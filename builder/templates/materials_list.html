@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* Main Background & Centering */
+    .price-check-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 70vh;
+        background-color: #f4f6f9; 
+        padding: 40px 20px;
+    }
+
+    /* The Premium Card */
+    .price-check-card {
+        background: #ffffff;
+        width: 100%;
+        max-width: 550px;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+        border-top: 5px solid #d35400; 
+    }
+
+    /* Title Styling */
+    .price-check-title {
+        text-align: center;
+        color: #333333;
+        font-size: 26px;
+        font-weight: bold;
+        margin-bottom: 30px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #eeeeee;
+    }
+
+    .price-check-title i {
+        color: #d35400;
+        margin-right: 10px;
+    }
+
+    /* Form Group & Labels */
+    .form-group {
+        margin-bottom: 25px;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 15px;
+        font-weight: bold;
+        color: #444444;
+        margin-bottom: 10px;
+    }
+
+    .form-group label i {
+        color: #d35400;
+        margin-right: 8px;
+        width: 20px; 
+        text-align: center;
+    }
+
+    /* Modern Dropdown Styling */
+    .custom-select {
+        width: 100%;
+        padding: 14px 18px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 15px;
+        color: #333;
+        background-color: #fafafa;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        appearance: none; 
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: url('data:image/svg+xml;utf8,<svg fill="%23d35400" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+        background-repeat: no-repeat;
+        background-position-x: 95%;
+        background-position-y: center;
+    }
+
+    .custom-select:focus {
+        border-color: #d35400;
+        background-color: #ffffff;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(211, 84, 0, 0.15); 
+    }
+
+    .custom-select:hover:not(:disabled) {
+        border-color: #cccccc;
+    }
+
+    /* Disabled State styling */
+    .custom-select:disabled {
+        background-color: #eeeeee;
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+
+    /* Result Card Styling (Upgraded for Premium Look) */
+    #result-card {
+        display: none;
+        margin-top: 30px;
+        text-align: center;
+        border: 2px dashed #d35400;
+        padding: 25px 20px;
+        border-radius: 8px;
+        background: #fffaf6; /* Light orange tint */
+    }
+    #result-card h3 {
+        color: #333;
+        font-size: 20px;
+        margin-bottom: 15px;
+    }
+    #result-card img {
+        width: 100%;
+        max-height: 200px;
+        object-fit: contain;
+        border-radius: 5px;
+        margin-bottom: 15px;
+        mix-blend-mode: multiply; /* Removes white bg from product images slightly */
+    }
+    #res-price {
+        color: #27ae60;
+        font-size: 30px;
+        margin: 0;
+        font-weight: bold;
+    }
+</style>
+
+<div class="price-check-wrapper">
+    <div class="price-check-card">
+        
+        <h2 class="price-check-title"><i class="fas fa-tags"></i> Check Material Price</h2>
+
+        <div class="form-group">
+            <label><i class="fas fa-hard-hat"></i> 1. Work / Profession?</label>
+            <select class="custom-select" id="professionSelect" onchange="loadMaterials()">
+                <option value="">-- Select Work Type --</option>
+                {% for prof in unique_professions %}
+                    <option value="{{ prof }}">{{ prof }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label><i class="fas fa-cubes"></i> 2. Material?</label>
+            <select class="custom-select" id="materialSelect" onchange="loadCompanies()" disabled>
+                <option value="">-- First Select Work Type --</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label><i class="fas fa-building"></i> 3. Company?</label>
+            <select class="custom-select" id="companySelect" onchange="showPrice()" disabled>
+                <option value="">-- Then Select Material --</option>
+            </select>
+        </div>
+
+        <div id="result-card">
+            <h3 id="res-title"></h3>
+            <img id="res-img" src="" alt="Material Image">
+            <h2 id="res-price"></h2>
+        </div>
+
+    </div>
+</div>
+
+{{ materials_json|json_script:"materials-data" }}
+
+<script>
+    const materialsData = JSON.parse(document.getElementById('materials-data').textContent);
+
+    // Step 1: Profession select pannathum Materials-a load pannanum
+    function loadMaterials() {
+        const profession = document.getElementById('professionSelect').value;
+        const materialSelect = document.getElementById('materialSelect');
+        const companySelect = document.getElementById('companySelect');
+        const resultCard = document.getElementById('result-card');
+
+        // Reset next dropdowns
+        materialSelect.innerHTML = '<option value="">-- Select Material --</option>';
+        companySelect.innerHTML = '<option value="">-- First Select Material --</option>';
+        materialSelect.disabled = true;
+        companySelect.disabled = true;
+        resultCard.style.display = 'none';
+
+        if (profession) {
+            materialSelect.disabled = false;
+            // Filter materials by profession and get unique names
+            const filteredByProf = materialsData.filter(m => m.profession === profession);
+            const uniqueMaterials = [...new Set(filteredByProf.map(m => m.name))];
+            
+            uniqueMaterials.forEach(name => {
+                let option = document.createElement('option');
+                option.value = name;
+                option.text = name;
+                materialSelect.add(option);
+            });
+        }
+    }
+
+    // Step 2: Material select pannathum Company-a load pannanum
+    function loadCompanies() {
+        const profession = document.getElementById('professionSelect').value;
+        const materialName = document.getElementById('materialSelect').value;
+        const companySelect = document.getElementById('companySelect');
+        const resultCard = document.getElementById('result-card');
+
+        companySelect.innerHTML = '<option value="">-- Select Company --</option>';
+        resultCard.style.display = 'none';
+
+        if (materialName) {
+            companySelect.disabled = false;
+            // Filter by BOTH profession and material name
+            const filteredMaterials = materialsData.filter(m => m.profession === profession && m.name === materialName);
+            
+            filteredMaterials.forEach(m => {
+                let option = document.createElement('option');
+                option.value = m.company;
+                option.text = m.company;
+                companySelect.add(option);
+            });
+        } else {
+            companySelect.disabled = true;
+        }
+    }
+
+    // Step 3: Company select pannathum Price kaatanum
+    function showPrice() {
+        const profession = document.getElementById('professionSelect').value;
+        const materialName = document.getElementById('materialSelect').value;
+        const companyName = document.getElementById('companySelect').value;
+        const resultCard = document.getElementById('result-card');
+
+        if (profession && materialName && companyName) {
+            const selectedMaterial = materialsData.find(m => m.profession === profession && m.name === materialName && m.company === companyName);
+
+            if (selectedMaterial) {
+                document.getElementById('res-title').innerText = selectedMaterial.name + " (" + selectedMaterial.company + ")";
+                document.getElementById('res-img').src = selectedMaterial.image;
+                document.getElementById('res-price').innerText = "Price: ₹" + selectedMaterial.price;
+                resultCard.style.display = 'block';
+            }
+        } else {
+            resultCard.style.display = 'none';
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* =========================================
+       GLOBAL BACKGROUND & WRAPPER
+       ========================================= */
+    .modify-home-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 75vh;
+        background-color: #f4f6f9; /* லைட் க்ரே பின்னணி */
+        padding: 40px 20px;
+    }
+
+    /* =========================================
+       THE PREMIUM CARD
+       ========================================= */
+    .modify-home-card {
+        background: #ffffff;
+        width: 100%;
+        max-width: 600px;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08); /* மென்மையான ஷேடோ */
+        border-top: 5px solid #2980b9; /* Edit Mode-க்கு ஏற்ற ப்ளூ பார்டர் */
+    }
+
+    /* Title Styling */
+    .modify-home-title {
+        text-align: center;
+        color: #333333;
+        font-size: 26px;
+        font-weight: bold;
+        margin-bottom: 30px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #eeeeee;
+    }
+
+    .modify-home-title i {
+        color: #2980b9;
+        margin-right: 10px;
+    }
+
+    /* =========================================
+       DJANGO FORM MAGIC STYLING ({{ form.as_p }})
+       ========================================= */
+    .django-form-area p {
+        margin-bottom: 20px;
+    }
+
+    .django-form-area label {
+        display: block;
+        font-size: 15px;
+        font-weight: bold;
+        color: #444444;
+        margin-bottom: 8px;
+    }
+
+    /* Input Boxes & Dropdowns */
+    .django-form-area input[type="text"], 
+    .django-form-area input[type="number"], 
+    .django-form-area input[type="email"], 
+    .django-form-area input[type="date"],
+    .django-form-area select,
+    .django-form-area textarea {
+        width: 100%;
+        padding: 14px 18px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 15px;
+        color: #333;
+        background-color: #fafafa;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+    }
+
+    /* Focus & Glow Effect (ப்ளூ நிற Glow) */
+    .django-form-area input:focus,
+    .django-form-area select:focus,
+    .django-form-area textarea:focus {
+        border-color: #2980b9;
+        background-color: #ffffff;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.15); 
+    }
+
+    .django-form-area input:hover,
+    .django-form-area select:hover {
+        border-color: #cccccc;
+    }
+
+    /* =========================================
+       PREMIUM UPDATE BUTTON
+       ========================================= */
+    .submit-btn {
+        background-color: #2980b9;
+        color: white;
+        padding: 14px 20px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        width: 100%;
+        font-size: 16px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        margin-top: 10px;
+        box-shadow: 0 4px 6px rgba(41, 128, 185, 0.2);
+    }
+
+    .submit-btn:hover {
+        background-color: #1c5980; /* டார்க் ப்ளூ */
+        transform: translateY(-2px); /* கொஞ்சம் மேல ஏறும் அனிமேஷன் */
+        box-shadow: 0 6px 12px rgba(41, 128, 185, 0.3);
+    }
+    
+    .submit-btn i {
+        margin-right: 8px;
+    }
+</style>
+
+<div class="modify-home-wrapper">
+    <div class="modify-home-card">
+        
+        <h2 class="modify-home-title"><i class="fas fa-edit"></i> Modify Home Details</h2>
+        
+        <form method="POST">
+            {% csrf_token %} 
+            
+            <div class="django-form-area">
+                {{ form.as_p }}
+            </div>
+            
+            <button type="submit" class="submit-btn"><i class="fas fa-sync-alt"></i> Update Details</button>
+            
+        </form>
+    </div>
+</div>
+{% endblock %}

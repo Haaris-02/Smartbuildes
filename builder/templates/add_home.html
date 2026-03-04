@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* Main Background & Centering */
+    .add-home-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 75vh;
+        background-color: #f4f6f9; /* லைட் க்ரே பின்னணி */
+        padding: 40px 20px;
+    }
+
+    /* The Premium Card */
+    .add-home-card {
+        background: #ffffff;
+        width: 100%;
+        max-width: 600px;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08); /* மென்மையான ஷேடோ */
+        border-top: 5px solid #d35400; /* Smartbuildes ஆரஞ்சு பார்டர் */
+    }
+
+    /* Title Styling */
+    .add-home-title {
+        text-align: center;
+        color: #333333;
+        font-size: 26px;
+        font-weight: bold;
+        margin-bottom: 30px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #eeeeee;
+    }
+
+    .add-home-title i {
+        color: #d35400;
+        margin-right: 10px;
+    }
+
+    /* --- Django {{ form.as_p }} Magic Styling --- */
+    .django-form-area p {
+        margin-bottom: 20px;
+    }
+
+    .django-form-area label {
+        display: block;
+        font-size: 15px;
+        font-weight: bold;
+        color: #444444;
+        margin-bottom: 8px;
+    }
+
+    /* Input Boxes & Dropdowns */
+    .django-form-area input[type="text"], 
+    .django-form-area input[type="number"], 
+    .django-form-area input[type="email"], 
+    .django-form-area input[type="date"],
+    .django-form-area select,
+    .django-form-area textarea {
+        width: 100%;
+        padding: 14px 18px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 15px;
+        color: #333;
+        background-color: #fafafa;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+    }
+
+    /* Focus (Click) பண்ணும்போது ஆரஞ்சு நிறம் வர */
+    .django-form-area input:focus,
+    .django-form-area select:focus,
+    .django-form-area textarea:focus {
+        border-color: #d35400;
+        background-color: #ffffff;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(211, 84, 0, 0.15); 
+    }
+
+    .django-form-area input:hover,
+    .django-form-area select:hover {
+        border-color: #cccccc;
+    }
+
+    /* Premium Save Button */
+    .submit-btn {
+        background-color: #d35400;
+        color: white;
+        padding: 14px 20px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        width: 100%;
+        font-size: 16px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        margin-top: 10px;
+        box-shadow: 0 4px 6px rgba(211, 84, 0, 0.2);
+    }
+
+    .submit-btn:hover {
+        background-color: #e67e22; /* லைட் ஆரஞ்சு */
+        transform: translateY(-2px); /* கொஞ்சம் மேல ஏறும் */
+        box-shadow: 0 6px 12px rgba(211, 84, 0, 0.3);
+    }
+    
+    .submit-btn i {
+        margin-right: 8px;
+    }
+</style>
+
+<div class="add-home-wrapper">
+    <div class="add-home-card">
+        
+        <h2 class="add-home-title"><i class="fas fa-home"></i> Add New Construction Project</h2>
+        
+        <form method="POST">
+            {% csrf_token %} 
+            
+            <div class="django-form-area">
+                {{ form.as_p }}
+            </div>
+            
+            <button type="submit" class="submit-btn"><i class="fas fa-save"></i> Save Home Details</button>
+            
+        </form>
+    </div>
+</div>
+
+{% endblock %}

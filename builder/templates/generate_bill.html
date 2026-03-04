@@ -1,0 +1,256 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* =========================================
+       GLOBAL CARD STYLING
+       ========================================= */
+    .bill-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 80vh;
+        background-color: #f4f6f9;
+        padding: 40px 20px;
+    }
+
+    .bill-card {
+        background: #ffffff;
+        width: 100%;
+        max-width: 850px;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        border-top: 5px solid #d35400; /* Smartbuildes Orange */
+    }
+
+    /* Title Styling */
+    .bill-title {
+        text-align: center;
+        color: #333333;
+        font-size: 28px;
+        font-weight: bold;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #eeeeee;
+    }
+
+    /* =========================================
+       FORM SECTION (BEFORE BILL GENERATION)
+       ========================================= */
+    .form-section h3 {
+        color: #2980b9;
+        font-size: 20px;
+        margin-bottom: 15px;
+        margin-top: 25px;
+    }
+
+    .material-summary {
+        background: #fff9f5;
+        border-left: 4px solid #d35400;
+        padding: 15px 20px;
+        border-radius: 4px;
+        font-size: 16px;
+        margin-bottom: 30px;
+    }
+
+    /* Form Inputs Styling */
+    .form-style p { margin-bottom: 15px; }
+    .form-style label {
+        display: block; font-weight: bold; margin-bottom: 8px; color: #444;
+    }
+    .form-style input {
+        width: 100%; padding: 12px 15px; border: 2px solid #e0e0e0;
+        border-radius: 8px; font-size: 15px; transition: 0.3s; box-sizing: border-box;
+    }
+    .form-style input:focus {
+        border-color: #d35400; outline: none; box-shadow: 0 0 0 3px rgba(211, 84, 0, 0.15);
+    }
+
+    .btn-calc {
+        background-color: #d35400; color: white; padding: 14px 20px; border: none;
+        border-radius: 8px; cursor: pointer; width: 100%; font-size: 18px; font-weight: bold;
+        margin-top: 20px; transition: 0.3s; box-shadow: 0 4px 10px rgba(211, 84, 0, 0.2);
+    }
+    .btn-calc:hover { background-color: #e67e22; transform: translateY(-2px); }
+
+    /* =========================================
+       FINAL INVOICE / BILL SECTION
+       ========================================= */
+    .invoice-box {
+        border: 1px solid #ddd;
+        padding: 40px;
+        border-radius: 8px;
+        background: white;
+        margin-top: 10px;
+    }
+
+    .invoice-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    .invoice-header h2 {
+        color: #222; font-size: 26px; font-weight: 900; letter-spacing: 1px; margin-bottom: 10px; text-transform: uppercase;
+    }
+    .invoice-meta {
+        display: flex; justify-content: space-between; background: #f8f9fa; padding: 15px; border-radius: 6px; border: 1px solid #eee;
+    }
+    .invoice-meta div { font-size: 15px; color: #555; }
+    .invoice-meta b { color: #222; }
+
+    .invoice-table { width: 100%; border-collapse: collapse; margin-top: 25px; margin-bottom: 25px;}
+    .invoice-table th { background: #333; color: white; padding: 12px; text-align: left; font-size: 15px; }
+    .invoice-table td { padding: 12px; border-bottom: 1px solid #eee; color: #444; }
+    
+    .table-section-title { font-size: 18px; color: #d35400; font-weight: bold; margin-top: 30px; border-bottom: 2px solid #d35400; padding-bottom: 5px; display: inline-block;}
+
+    .sub-total-row td { background: #fdfdfd; font-weight: bold; color: #222; border-top: 2px solid #ddd;}
+    
+    .grand-total-box {
+        background: #f4f6f9; border: 2px solid #2980b9; border-radius: 8px; margin-top: 30px; padding: 0; overflow: hidden;
+    }
+    .grand-total-row { display: flex; justify-content: space-between; padding: 15px 20px; border-bottom: 1px solid #ddd; }
+    .grand-total-row.final { background: #2980b9; color: white; font-size: 22px; font-weight: bold; border-bottom: none;}
+
+    /* Buttons */
+    .action-buttons { display: flex; justify-content: center; gap: 15px; margin-top: 30px; }
+    .btn-print { background: #27ae60; color: white; padding: 12px 25px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; transition: 0.3s;}
+    .btn-print:hover { background: #219653; }
+    .btn-back { background: #7f8c8d; color: white; padding: 12px 25px; text-decoration: none; border-radius: 6px; font-size: 16px; font-weight: bold; transition: 0.3s;}
+    .btn-back:hover { background: #636e72; color: white; }
+
+    /* =========================================
+       PRINT CSS MAGIC (Hide Footer & Navbar)
+       ========================================= */
+    @media print {
+        /* Hide everything by default */
+        body * { visibility: hidden; }
+        
+        /* Show ONLY the printable area and its children */
+        #printable-area, #printable-area * { visibility: visible; }
+        
+        /* Align the bill to top left of paper without website margins */
+        #printable-area { position: absolute; left: 0; top: 0; width: 100%; border: none; box-shadow: none; padding: 0; margin: 0; }
+        
+        /* Hide buttons from the printed paper */
+        .no-print { display: none !important; }
+
+        /* Force background colors to print exactly as seen */
+        * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+        
+        /* Remove external wrapper paddings */
+        .bill-wrapper { background: white; padding: 0; }
+        .bill-card { box-shadow: none; border: none; padding: 0; max-width: 100%;}
+        .site-footer { display: none !important; } /* Force hide footer */
+    }
+</style>
+
+<div class="bill-wrapper">
+    <div class="bill-card">
+        
+        {% if not show_bill %}
+        <h2 class="bill-title"><i class="fas fa-calculator"></i> Generate Final Estimate & Bill</h2>
+        
+        <div class="form-section">
+            <h3>1. Material Cost Summary</h3>
+            <div class="material-summary">
+                Total Material Cost So Far: <b style="font-size: 20px;">₹{{ total_material_cost }}</b>
+            </div>
+            
+            <h3>2. Enter Labor Costs & Profit</h3>
+            <form method="POST" class="form-style">
+                {% csrf_token %}
+                
+                {{ form.as_p }}
+                
+                <div style="margin-top: 20px;">
+                    <label style="color: #27ae60; font-size: 18px;"><i class="fas fa-chart-line"></i> Your Company Profit Margin (₹):</label>
+                    <input type="number" name="profit" min="0" required placeholder="Enter your profit amount (e.g. 50000)" value="0" style="border-color: #27ae60;">
+                </div>
+                
+                <button type="submit" class="btn-calc"><i class="fas fa-file-invoice"></i> Calculate Final Bill</button>
+            </form>
+        </div>
+        {% endif %}
+
+
+        {% if show_bill %}
+        <div id="printable-area" class="invoice-box">
+            
+            <div class="invoice-header">
+                <h2>SMARTBUILDES ESTIMATE</h2>
+                <div class="invoice-meta">
+                    <div>
+                        Client Name: <b>{{ home.owner_name }}</b><br>
+                        Location: <b>{{ home.place }}</b>
+                    </div>
+                    <div style="text-align: right;">
+                        Home Type: <b>{{ home.home_type }}</b><br>
+                        Area Sq.Ft: <b>{{ home.sqr_feet }}</b>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-section-title">Materials Used Summary</div>
+            <table class="invoice-table">
+                <thead>
+                    <tr>
+                        <th>Material</th>
+                        <th>Brand / Company</th>
+                        <th style="text-align: center;">Qty</th>
+                        <th style="text-align: right;">Total Amount (₹)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in materials %}
+                    <tr>
+                        <td>{{ item.material.name }}</td>
+                        <td>{{ item.material.company_name }}</td>
+                        <td style="text-align: center;">{{ item.quantity }}</td>
+                        <td style="text-align: right;">{{ item.total_price }}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr class="sub-total-row">
+                        <td colspan="3" style="text-align: right;">Total Material Cost:</td>
+                        <td style="text-align: right; color: #d35400;">₹{{ total_material_cost }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="table-section-title">Labor Charges</div>
+            <table class="invoice-table">
+                <tbody>
+                    <tr><td width="70%">Electrician</td><td style="text-align: right;">₹{{ labor_cost.electrician_cost }}</td></tr>
+                    <tr><td>Plumber</td><td style="text-align: right;">₹{{ labor_cost.plumber_cost }}</td></tr>
+                    <tr><td>Mason</td><td style="text-align: right;">₹{{ labor_cost.mason_cost }}</td></tr>
+                    <tr><td>Painter</td><td style="text-align: right;">₹{{ labor_cost.painter_cost }}</td></tr>
+                    <tr><td>Carpenter</td><td style="text-align: right;">₹{{ labor_cost.carpenter_cost }}</td></tr>
+                    <tr class="sub-total-row">
+                        <td style="text-align: right;">Total Labor Cost:</td>
+                        <td style="text-align: right; color: #d35400;">₹{{ labor_cost.total_labor_cost }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="grand-total-box">
+                <div class="grand-total-row">
+                    <span>Company Service Charge / Profit:</span>
+                    <b>₹{{ profit }}</b>
+                </div>
+                <div class="grand-total-row final">
+                    <span>GRAND TOTAL ESTIMATE:</span>
+                    <span>₹{{ grand_total }}</span>
+                </div>
+            </div>
+            
+            <div class="action-buttons no-print">
+                <button onclick="window.print()" class="btn-print"><i class="fas fa-print"></i> Print Invoice</button>
+                <a href="/view-homes/" class="btn-back"><i class="fas fa-arrow-left"></i> Back to Projects</a>
+            </div>
+
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* =========================================
+       GLOBAL BACKGROUND & WRAPPER
+       ========================================= */
+    .projects-wrapper {
+        background-color: #f4f6f9;
+        min-height: 80vh;
+        padding: 40px 20px;
+        font-family: Arial, sans-serif;
+    }
+
+    /* =========================================
+       PREMIUM CARD STYLING
+       ========================================= */
+    .projects-card {
+        background: #ffffff;
+        max-width: 1100px;
+        margin: 0 auto 40px auto; 
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+
+    .card-ongoing { border-top: 5px solid #d35400; } /* Orange for Active */
+    .card-finished { border-top: 5px solid #27ae60; } /* Green for Finished */
+
+    .card-title {
+        color: #333;
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #eee;
+    }
+
+    /* =========================================
+       MODERN TABLE STYLING
+       ========================================= */
+    .table-responsive { overflow-x: auto; }
+    
+    .modern-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+
+    .modern-table th {
+        background-color: #f8f9fa;
+        color: #444;
+        padding: 15px;
+        text-align: left;
+        font-size: 15px;
+        border-bottom: 2px solid #ddd; 
+    }
+
+    .modern-table td {
+        padding: 15px;
+        border-bottom: 1px solid #eeeeee;
+        color: #555;
+        font-size: 15px;
+        vertical-align: middle;
+    }
+
+    .modern-table tr:hover { background-color: #fafafa; }
+
+    /* =========================================
+       ACTION BUTTONS STYLING
+       ========================================= */
+    .action-cell {
+        display: flex;
+        flex-direction: column; 
+        gap: 8px; 
+        min-width: 160px; 
+    }
+
+    .action-btn {
+        display: inline-block;
+        text-align: center;
+        padding: 8px 10px;
+        font-size: 13px;
+        font-weight: bold;
+        text-decoration: none;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+        width: 100%; 
+        box-sizing: border-box;
+    }
+
+    /* 1. Modify Details */
+    .btn-modify { background-color: transparent; color: #333; border: 1.5px solid #333; }
+    .btn-modify:hover { background-color: #333; color: #fff; }
+
+    /* 2. Add Materials */
+    .btn-add { background-color: #d35400; color: #fff; border: 1.5px solid #d35400; }
+    .btn-add:hover { background-color: #e67e22; border-color: #e67e22; }
+
+    /* 3. Generate Bill */
+    .btn-bill { background-color: #111; color: #fff; border: 1.5px solid #111; }
+    .btn-bill:hover { background-color: #444; border-color: #444; }
+
+    /* 4. Mark as Finished (New Button) */
+    .btn-finish { background-color: transparent; color: #27ae60; border: 1.5px solid #27ae60; }
+    .btn-finish:hover { background-color: #27ae60; color: #fff; }
+
+    /* Status Badge */
+    .status-badge {
+        background-color: #e8f5e9;
+        color: #2e7d32;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: bold;
+        display: inline-block;
+    }
+</style>
+
+<div class="projects-wrapper">
+
+    <div class="projects-card card-ongoing">
+        <h2 class="card-title" style="color: #d35400;">
+            <i class="fas fa-hard-hat"></i> Ongoing Projects
+        </h2>
+        
+        <div class="table-responsive">
+            <table class="modern-table">
+                <thead>
+                    <tr>
+                        <th>Owner Name</th>
+                        <th>Type</th>
+                        <th>Place</th>
+                        <th>Sq. Feet</th>
+                        <th>Finish Date</th>
+                        <th style="text-align: center;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for home in active_homes %}
+                    <tr>
+                        <td><b>{{ home.owner_name }}</b></td>
+                        <td>{{ home.home_type }}</td>
+                        <td>{{ home.place }}</td>
+                        <td>{{ home.sqr_feet }}</td>
+                        <td>{{ home.finish_date }}</td>
+                        <td class="action-cell">
+                            <a href="/update-home/{{ home.id }}/" class="action-btn btn-modify">
+                                <i class="fas fa-edit"></i> Modify Details
+                            </a>
+                            <a href="/add-material/{{ home.id }}/" class="action-btn btn-add">
+                                <i class="fas fa-plus"></i> Add Materials
+                            </a>
+                            <a href="/generate-bill/{{ home.id }}/" class="action-btn btn-bill">
+                                <i class="fas fa-file-invoice-dollar"></i> Generate Bill
+                            </a>
+                            <a href="/mark-finished/{{ home.id }}/" class="action-btn btn-finish" onclick="return confirm('Are you sure you want to mark this project as COMPLETED?');">
+                                <i class="fas fa-check-circle"></i> Mark Finished
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 40px; color: #888;">
+                            <i class="fas fa-folder-open" style="font-size: 40px; color: #ccc; margin-bottom: 15px;"></i><br>
+                            You have no active projects right now. Click "+ Add New Home" to start!
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <div class="projects-card card-finished">
+        <h2 class="card-title" style="color: #27ae60;">
+            <i class="fas fa-check-double"></i> Completed Projects
+        </h2>
+        
+        <div class="table-responsive">
+            <table class="modern-table">
+                <thead>
+                    <tr>
+                        <th>Owner Name</th>
+                        <th>Type</th>
+                        <th>Place</th>
+                        <th>Sq. Feet</th>
+                        <th>Status</th>
+                        <th style="text-align: center;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for home in finished_homes %}
+                    <tr>
+                        <td><b>{{ home.owner_name }}</b></td>
+                        <td>{{ home.home_type }}</td>
+                        <td>{{ home.place }}</td>
+                        <td>{{ home.sqr_feet }}</td>
+                        <td><span class="status-badge"><i class="fas fa-check"></i> Finished</span></td>
+                        <td class="action-cell">
+                            <a href="/generate-bill/{{ home.id }}/" class="action-btn btn-bill">
+                                <i class="fas fa-file-pdf"></i> View Final Bill
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 40px; color: #888;">
+                            <i class="fas fa-trophy" style="font-size: 40px; color: #ccc; margin-bottom: 15px;"></i><br>
+                            No completed projects yet. Finish your ongoing projects to see them here!
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

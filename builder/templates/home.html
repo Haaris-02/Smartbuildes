@@ -1,0 +1,427 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* =========================================
+       GLOBAL & BACKGROUND STYLES
+       ========================================= */
+    body {
+        background-color: #f4f6f9; /* Light grey background for premium contrast */
+    }
+
+    /* =========================================
+       1. MAIN SLIDER SECTION
+       ========================================= */
+    .home-slider-container {
+        width: 100%;
+        max-width: 1100px; 
+        height: 350px;     
+        margin: 40px auto; 
+        position: relative;
+        overflow: hidden;
+        border-radius: 12px; 
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15); /* Premium soft shadow */
+        border: 1px solid #eee;
+    }
+
+    .swiper { width: 100%; height: 100%; }
+    
+    .swiper-slide img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: fill; 
+    }
+
+    .swiper-button-next, .swiper-button-prev {
+        color: white !important; 
+        background: rgba(0, 0, 0, 0.3) !important; /* Semi-transparent black circle */
+        width: 50px !important;
+        height: 50px !important;
+        border-radius: 50%;
+        transition: 0.3s ease;
+    }
+    
+    .swiper-button-next:hover, .swiper-button-prev:hover {
+        background: #d35400 !important; /* Orange on hover */
+    }
+
+    .swiper-button-next::after, .swiper-button-prev::after {
+        font-size: 20px !important;
+        font-weight: bold;
+    }
+
+    /* =========================================
+       2. BRANDS SECTION
+       ========================================= */
+    .brands-section {
+        width: 95%;
+        max-width: 1100px;
+        margin: 40px auto;
+        background-color: white; 
+        padding: 30px 40px;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.06);
+        border-top: 4px solid #d35400; /* Orange highlight top border */
+    }
+    
+    .brands-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        border-bottom: 2px solid #f0f0f0;
+        padding-bottom: 15px;
+    }
+
+    .brands-header h2 {
+        color: #333;
+        margin: 0;
+        font-size: 24px;
+        font-weight: bold;
+    }
+
+    .view-all-btn {
+        background-color: #2980b9;
+        color: white;
+        padding: 10px 24px;
+        text-decoration: none;
+        border-radius: 6px;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+    .view-all-btn:hover { background-color: #1c5980; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+
+    .brandsSwiper { width: 100%; height: 160px; }
+
+    .brand-slide {
+        width: 200px !important; 
+        height: 150px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: transform 0.3s ease, box-shadow 0.3s ease; 
+        border-radius: 8px;
+        background: #fff;
+    }
+
+    .brand-slide:hover {
+        transform: translateY(-5px); /* Moves up slightly */
+        box-shadow: 0 10px 20px rgba(0,0,0,0.08); /* Glow effect */
+    }
+
+    .brand-slide img {
+        max-width: 150px; 
+        max-height: 100px;
+        object-fit: contain; 
+    }
+
+    .brand-next, .brand-prev {
+        color: #333 !important; 
+        background: #fff !important; 
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .brand-next:hover, .brand-prev:hover { background: #f0f0f0 !important; color: #d35400 !important;}
+
+    /* =========================================
+       3. CALCULATOR SECTION (PREMIUM LOOK)
+       ========================================= */
+    .calculator-section {
+        width: 95%;
+        max-width: 850px;
+        margin: 60px auto;
+        background-color: #ffffff;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        font-family: Arial, sans-serif;
+    }
+
+    .calc-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 30px;
+        border-bottom: 2px solid #f0f0f0;
+        padding-bottom: 20px;
+    }
+
+    .calc-icon {
+        font-size: 35px;
+        color: #d35400;
+        margin-right: 20px;
+        border: 3px solid #d35400;
+        padding: 10px 15px;
+        border-radius: 12px;
+        font-weight: bold;
+        line-height: 1.1;
+        text-align: center;
+        background-color: #fff9f5;
+    }
+
+    .calc-header h2 { margin: 0; color: #222; font-size: 28px;}
+    .calc-header p { margin: 8px 0 0 0; color: #666; font-size: 15px; line-height: 1.5;}
+    
+    .calc-form-group { margin-bottom: 25px; }
+    .calc-form-group label { display: block; margin-bottom: 10px; color: #444; font-weight: bold; font-size: 15px;}
+    
+    .calc-form-group select, .calc-form-group input {
+        width: 100%; 
+        padding: 15px 18px; 
+        border: 2px solid #e0e0e0; 
+        border-radius: 8px; 
+        font-size: 16px;
+        color: #333;
+        transition: 0.3s;
+        box-sizing: border-box;
+    }
+    .calc-form-group select:focus, .calc-form-group input:focus {
+        border-color: #2980b9;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.1);
+    }
+    
+    .button-group {
+        display: flex;
+        align-items: center;
+        margin-top: 10px;
+    }
+
+    .calc-btn {
+        background-color: #2980b9; 
+        color: white; 
+        border: none; 
+        padding: 15px 35px;
+        font-size: 16px; 
+        border-radius: 8px; 
+        cursor: pointer; 
+        font-weight: bold;
+        transition: 0.3s;
+        box-shadow: 0 4px 12px rgba(41, 128, 185, 0.3);
+    }
+    .calc-btn:hover { background-color: #1c5980; transform: translateY(-2px); }
+
+    .clear-btn {
+        background-color: #95a5a6; 
+        color: white; 
+        border: none; 
+        padding: 15px 25px;
+        font-size: 16px; 
+        border-radius: 8px; 
+        cursor: pointer; 
+        font-weight: bold;
+        margin-left: 15px; 
+        transition: 0.3s;
+    }
+    .clear-btn:hover { background-color: #7f8c8d; }
+    
+    .disclaimer { font-size: 13px; color: #888; margin-top: 25px; line-height: 1.6;}
+
+    /* Premium Result Area */
+    #calc-result {
+        display: none; 
+        margin-top: 40px; 
+        border-top: 2px dashed #d35400; 
+        padding-top: 30px;
+    }
+    .result-title {font-size: 16px; color: #333; margin-bottom: 5px;}
+    .total-cost-text { color: #d35400; font-size: 32px; font-weight: bold; margin: 0 0 25px 0;}
+    
+    .stage-row {
+        background-color: #f8f9fa; 
+        padding: 18px 20px; 
+        margin-bottom: 12px;
+        display: flex; 
+        justify-content: space-between; 
+        border-radius: 8px; 
+        font-size: 16px;
+        border-left: 4px solid #d35400;
+        color: #444;
+    }
+    .stage-amount { color: #d35400; font-weight: bold; font-size: 18px;}
+</style>
+
+<div class="home-slider-container">
+    <div class="swiper myHomeSwiper">
+        <div class="swiper-wrapper">
+            <div class="swiper-slide"><img src="{% static 'images/we1.jpg' %}" alt="Banner 1"></div>
+            <div class="swiper-slide"><img src="{% static 'images/we2.jpg' %}" alt="Banner 2"></div>
+            <div class="swiper-slide"><img src="{% static 'images/we3.jpg' %}" alt="Banner 3"></div>
+            <div class="swiper-slide"><img src="{% static 'images/we4.jpg' %}" alt="Banner 4"></div>
+            <div class="swiper-slide"><img src="{% static 'images/we5.jpg' %}" alt="Banner 5"></div>
+            <div class="swiper-slide"><img src="{% static 'images/we6.jpg' %}" alt="Banner 6"></div>
+        </div>
+        <div class="swiper-button-next"></div>
+        <div class="swiper-button-prev"></div>
+    </div>
+</div>
+
+<div class="brands-section">
+    <div class="brands-header">
+        <h2>Top Brands</h2>
+        <a href="/materials/" class="view-all-btn">View All Brands</a>
+    </div>
+
+    <div class="swiper brandsSwiper">
+        <div class="swiper-wrapper">
+            <div class="swiper-slide brand-slide">
+                <a href="/search/?q=Ambuja"><img src="{% static 'Brands/Ambuja-Cement.jpg' %}" alt="Ambuja"></a>
+            </div>
+            <div class="swiper-slide brand-slide">
+                <a href="/search/?q=Asian Paints"><img src="{% static 'Brands/asian.jpg' %}" alt="Asian Paints"></a>
+            </div>
+            <div class="swiper-slide brand-slide">
+                <a href="/search/?q=Godrej"><img src="{% static 'Brands/godrej2.jpg' %}" alt="Godrej"></a>
+            </div>
+            <div class="swiper-slide brand-slide">
+                <a href="/search/?q=GreenPanel"><img src="{% static 'Brands/GreenPanel.jpg' %}" alt="GreenPanel"></a>
+            </div>
+            <div class="swiper-slide brand-slide">
+                <a href="/search/?q=Havells"><img src="{% static 'Brands/havells.jpg' %}" alt="Havells"></a>
+            </div>
+            <div class="swiper-slide brand-slide">
+                <a href="/search/?q=Hindware"><img src="{% static 'Brands/hindware.jpg' %}" alt="Hindware"></a>
+            </div>
+            <div class="swiper-slide brand-slide">
+                <a href="/search/?q=Jaquar"><img src="{% static 'Brands/jaquar.jpg' %}" alt="Jaquar"></a>
+            </div>
+            <div class="swiper-slide brand-slide">
+                <a href="/search/?q=Jindal"><img src="{% static 'Brands/jindal.jpg' %}" alt="Jindal"></a>
+            </div>
+            <div class="swiper-slide brand-slide">
+                <a href="/search/?q=Kajaria"><img src="{% static 'Brands/kajaria.jpg' %}" alt="Kajaria"></a>
+            </div>
+            <div class="swiper-slide brand-slide">
+                <a href="/search/?q=Somany"><img src="{% static 'Brands/Somany.jpg' %}" alt="Somany"></a>
+            </div>
+            <div class="swiper-slide brand-slide">
+                <a href="/search/?q=Strongcrete"><img src="{% static 'Brands/strongcrete.jpg' %}" alt="Strongcrete"></a>
+            </div>
+            <div class="swiper-slide brand-slide">
+                <a href="/search/?q=Tata Steel"><img src="{% static 'Brands/tata2.jpg' %}" alt="Tata Steel"></a>
+            </div>
+        </div>
+        <div class="swiper-button-next brand-next"></div>
+        <div class="swiper-button-prev brand-prev"></div>
+    </div>
+</div>
+
+<div class="calculator-section">
+    <div class="calc-header">
+        <div class="calc-icon">+-<br>x=</div>
+        <div>
+            <h2>Construction Cost Calculator</h2>
+            <p>Cost Calculator helps you get a realistic estimate of your actual costs in constructing your home.</p>
+        </div>
+    </div>
+
+    <div class="calc-form-group">
+        <label>Select Location</label>
+        <select id="calc-location">
+            <option value="1500">Metro (Chennai, Coimbatore)</option>
+            <option value="1287" selected>Urban (Madurai, Trichy)</option>
+            <option value="1150">Semi-Urban</option>
+            <option value="1050">District</option>
+            <option value="950">Taluka</option>
+        </select>
+    </div>
+
+    <div class="calc-form-group">
+        <label>Enter Area (Sqft)</label>
+        <input type="number" id="calc-area" placeholder="Please enter area in square feet">
+    </div>
+
+    <div class="button-group">
+        <button class="calc-btn" onclick="calculateCost()">CALCULATE ➜</button>
+        <button class="clear-btn" onclick="clearCalculator()">CLEAR ✖</button>
+    </div>
+
+    <p class="disclaimer">
+        Disclaimer:<br>Values have been calculated using the average cost per sq.ft in each location.<br>
+        Actual cost will vary depending upon:<br>1. Desired quality and finishing<br>2. Actual cost of material & labor
+    </p>
+
+    <div id="calc-result">
+        <div class="result-title">Total Estimated Expenditure</div>
+        <div class="total-cost-text" id="total-range">Rs. 0.00 - 0.00</div>
+
+        <div class="stage-row">
+            <span>Pre-Construction Stage</span> <span class="stage-amount" id="pre-cost">Rs. 0</span>
+        </div>
+        <div class="stage-row">
+            <span>Construction Stage</span> <span class="stage-amount" id="const-cost">Rs. 0</span>
+        </div>
+        <div class="stage-row">
+            <span>Post-Construction Stage</span> <span class="stage-amount" id="post-cost">Rs. 0</span>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+<script>
+    // --- 1. Main Slider Logic ---
+    var mainSwiper = new Swiper(".myHomeSwiper", {
+        loop: true,
+        speed: 800,
+        autoplay: {
+            delay: 3000, // Automatic aaga 3 seconds ku oru thadava slide aagum
+            disableOnInteraction: false,
+        },
+        navigation: {
+            nextEl: ".swiper-button-next",
+            prevEl: ".swiper-button-prev",
+        },
+    });
+
+    // --- 2. Brands Slider Logic ---
+    var brandsSwiper = new Swiper(".brandsSwiper", {
+        slidesPerView: "auto", 
+        spaceBetween: 20, 
+        freeMode: true, 
+        grabCursor: true,
+        navigation: {
+            nextEl: ".brand-next",
+            prevEl: ".brand-prev",
+        },
+        mousewheel: {
+            forceToAxis: true, 
+        },
+    });
+
+    // --- 3. Calculator Logic ---
+    function calculateCost() {
+        let sqft = document.getElementById('calc-area').value;
+        let ratePerSqft = document.getElementById('calc-location').value;
+
+        if (!sqft || sqft <= 0) {
+            alert("Please enter a valid Square Feet area!");
+            return;
+        }
+
+        let totalBaseCost = sqft * ratePerSqft;
+        let preCost = totalBaseCost * 0.07;
+        let constCost = totalBaseCost * 0.66;
+        let postCost = totalBaseCost * 0.27;
+        let minCost = totalBaseCost * 0.98;
+        let maxCost = totalBaseCost * 1.02;
+
+        const formatMoney = (num) => {
+            return num.toLocaleString('en-IN', { maximumFractionDigits: 0 });
+        };
+
+        document.getElementById('total-range').innerText = `Rs. ${formatMoney(minCost)}.00 - ${formatMoney(maxCost)}.00`;
+        document.getElementById('pre-cost').innerText = `Rs. ${formatMoney(preCost)}`;
+        document.getElementById('const-cost').innerText = `Rs. ${formatMoney(constCost)}`;
+        document.getElementById('post-cost').innerText = `Rs. ${formatMoney(postCost)}`;
+
+        document.getElementById('calc-result').style.display = 'block';
+    }
+
+    function clearCalculator() {
+        document.getElementById('calc-area').value = '';
+        document.getElementById('calc-location').value = '1287';
+        document.getElementById('calc-result').style.display = 'none';
+    }
+</script>
+{% endblock %}

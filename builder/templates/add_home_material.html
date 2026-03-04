@@ -1,0 +1,301 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* =========================================
+       GLOBAL BACKGROUND & WRAPPER
+       ========================================= */
+    .add-material-wrapper {
+        background-color: #f4f6f9;
+        min-height: 80vh;
+        padding: 40px 20px;
+        font-family: Arial, sans-serif;
+    }
+
+    /* =========================================
+       PREMIUM CARD STYLING
+       ========================================= */
+    .material-card {
+        background: #ffffff;
+        max-width: 800px;
+        margin: 0 auto 30px auto; /* Cards-க்கு நடுவே இடைவெளி */
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        border-top: 5px solid #d35400; /* Smartbuildes Orange */
+    }
+
+    .table-card {
+        border-top: 5px solid #2980b9; /* Table Card-க்கு Blue Border */
+    }
+
+    /* Titles */
+    .card-title {
+        text-align: center;
+        color: #333;
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 30px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #eee;
+    }
+
+    .card-title i {
+        margin-right: 10px;
+    }
+
+    /* =========================================
+       FORM ELEMENTS (MODERN DESIGN)
+       ========================================= */
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: bold;
+        color: #444;
+        margin-bottom: 8px;
+        font-size: 15px;
+    }
+
+    .form-group label i {
+        color: #d35400;
+        margin-right: 8px;
+        width: 20px;
+        text-align: center;
+    }
+
+    .custom-input, .custom-select {
+        width: 100%;
+        padding: 14px 18px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 15px;
+        color: #333;
+        background-color: #fafafa;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+    }
+
+    /* Custom Arrow for Dropdowns */
+    .custom-select {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: url('data:image/svg+xml;utf8,<svg fill="%23d35400" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+        background-repeat: no-repeat;
+        background-position-x: 96%;
+        background-position-y: center;
+        cursor: pointer;
+    }
+
+    .custom-input:focus, .custom-select:focus {
+        border-color: #d35400;
+        background-color: #ffffff;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(211, 84, 0, 0.15);
+    }
+
+    .custom-select:disabled {
+        background-color: #eeeeee;
+        opacity: 0.7;
+        cursor: not-allowed;
+        background-image: none; /* Disabled போது Arrow வேண்டாம் */
+    }
+
+    /* Button */
+    .btn-add {
+        background-color: #27ae60; /* Green color for 'Add' action */
+        color: white;
+        padding: 15px 20px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 15px;
+        transition: 0.3s;
+        box-shadow: 0 4px 10px rgba(39, 174, 96, 0.2);
+    }
+
+    .btn-add:hover {
+        background-color: #219653;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(39, 174, 96, 0.3);
+    }
+
+    /* =========================================
+       MODERN TABLE STYLING
+       ========================================= */
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .modern-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+
+    .modern-table th {
+        background-color: #f8f9fa;
+        color: #333;
+        padding: 15px;
+        text-align: left;
+        font-size: 15px;
+        border-bottom: 2px solid #2980b9; /* Blue highlight */
+    }
+
+    .modern-table td {
+        padding: 15px;
+        border-bottom: 1px solid #eeeeee;
+        color: #555;
+        font-size: 15px;
+    }
+
+    .modern-table tr:hover {
+        background-color: #fafafa;
+    }
+
+    .price-text {
+        color: #27ae60;
+        font-weight: bold;
+        font-size: 16px;
+    }
+</style>
+
+<div class="add-material-wrapper">
+    
+    <div class="material-card">
+        <h2 class="card-title" style="color: #d35400;">
+            <i class="fas fa-tools"></i> Add Materials for: {{ home.owner_name }}'s Project
+        </h2>
+        
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label><i class="fas fa-hard-hat"></i> 1. Select Profession:</label>
+                <select id="profSelect" class="custom-select" onchange="loadMaterials()" required>
+                    <option value="">-- Select Work Type --</option>
+                    {% for prof in unique_professions %}
+                        <option value="{{ prof }}">{{ prof }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-cubes"></i> 2. Select Material:</label>
+                <select id="matSelect" class="custom-select" onchange="loadCompanies()" disabled required>
+                    <option value="">-- First Select Work Type --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-building"></i> 3. Select Company:</label>
+                <select id="compSelect" class="custom-select" name="material_id" disabled required>
+                    <option value="">-- Then Select Material --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-weight-hanging"></i> 4. Quantity:</label>
+                <input type="number" name="quantity" class="custom-input" min="1" required placeholder="Enter quantity (e.g. 10)">
+            </div>
+
+            <button type="submit" class="btn-add"><i class="fas fa-plus-circle"></i> Add to Estimate</button>
+        </form>
+    </div>
+
+    <div class="material-card table-card">
+        <h2 class="card-title" style="color: #2980b9; border-bottom: none; margin-bottom: 10px; text-align: left;">
+            <i class="fas fa-list-alt"></i> Materials Added So Far
+        </h2>
+        
+        <div class="table-responsive">
+            <table class="modern-table">
+                <thead>
+                    <tr>
+                        <th>Material Name (Company)</th>
+                        <th>Unit Price (₹)</th>
+                        <th>Qty</th>
+                        <th>Total Price (₹)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in added_materials %}
+                    <tr>
+                        <td><b>{{ item.material.name }}</b> <span style="color: #888; font-size: 13px;">({{ item.material.company_name }})</span></td>
+                        <td>₹{{ item.material.price }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td class="price-text">₹{{ item.total_price }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; padding: 30px; color: #888;">
+                            <i class="fas fa-box-open" style="font-size: 30px; margin-bottom: 10px; color: #ccc;"></i><br>
+                            No materials added yet. Start adding from the form above!
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+{{ materials_json|json_script:"materials-data" }}
+
+<script>
+    const materialsData = JSON.parse(document.getElementById('materials-data').textContent);
+
+    function loadMaterials() {
+        const profession = document.getElementById('profSelect').value;
+        const matSelect = document.getElementById('matSelect');
+        const compSelect = document.getElementById('compSelect');
+
+        matSelect.innerHTML = '<option value="">-- Select Material --</option>';
+        compSelect.innerHTML = '<option value="">-- First Select Material --</option>';
+        matSelect.disabled = true;
+        compSelect.disabled = true;
+
+        if (profession) {
+            matSelect.disabled = false;
+            const filteredByProf = materialsData.filter(m => m.profession === profession);
+            const uniqueMaterials = [...new Set(filteredByProf.map(m => m.name))];
+            
+            uniqueMaterials.forEach(name => {
+                let option = document.createElement('option');
+                option.value = name;
+                option.text = name;
+                matSelect.add(option);
+            });
+        }
+    }
+
+    function loadCompanies() {
+        const profession = document.getElementById('profSelect').value;
+        const materialName = document.getElementById('matSelect').value;
+        const compSelect = document.getElementById('compSelect');
+
+        compSelect.innerHTML = '<option value="">-- Select Company --</option>';
+
+        if (materialName) {
+            compSelect.disabled = false;
+            const filteredMaterials = materialsData.filter(m => m.profession === profession && m.name === materialName);
+            
+            filteredMaterials.forEach(m => {
+                let option = document.createElement('option');
+                option.value = m.id; // DB ID-a anupurom
+                option.text = m.company + " (₹" + m.price + " per unit)";
+                compSelect.add(option);
+            });
+        } else {
+            compSelect.disabled = true;
+        }
+    }
+</script>
+{% endblock %}

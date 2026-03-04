@@ -1,0 +1,496 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smartbuildes Management</title>
+    <style>
+        
+        .top-bar { background-color: #222; color: white; padding: 5px 20px; display: flex; justify-content: space-between; font-size: 14px; }
+        .top-bar a { color: white; text-decoration: none; margin-left: 10px; }
+        .header-bar { background-color: #d35400; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between;}
+        .logo-sec { color: white; font-size: 24px; font-weight: bold; display: flex; align-items: center;}
+        .logo-sec img { height: 40px; margin-right: 10px; border-radius: 5px; }
+        .search-sec { flex-grow: 1; max-width: 600px; display: flex; margin-left: 30px;}
+        .search-sec input { width: 100%; padding: 10px; border: none; border-radius: 4px 0 0 4px; outline: none;}
+        .search-sec button { padding: 10px 20px; border: none; background-color: #2980b9; color: white; border-radius: 0 4px 4px 0; cursor: pointer; }
+        
+        .navbar { background-color: rgba(0, 0, 0, 0.8); padding: 15px; text-align: center; }
+        .navbar a { color: white; text-decoration: none; padding: 10px 20px; margin: 0 10px; font-size: 16px; border-radius: 5px; background-color: #555; }
+        .navbar a:hover { background-color: #777; }
+        .container { padding: 40px; background-color: rgba(0, 0, 0, 0.6); margin: 40px auto; width: 80%; border-radius: 10px; }
+    </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+</head>
+<body>
+
+    <div class="top-bar">
+        <div>📱 8901234567 | 💬 8907654321</div>
+        <div>
+            {% if request.user.is_authenticated %}
+                Welcome, <b style="color: #f1c40f;">{{ request.user.username }}</b> | 
+                <a href="/logout/">Logout</a>
+            {% else %}
+                <a href="/login/">Login</a> | 
+                <a href="/register/">Register</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="header-bar">
+        <div class="logo-sec">
+            <img src="{% static 'logo.jpg' %}" alt="Logo"> SMARTBUILDES
+        </div>
+        <div class="search-sec">
+            <form action="/search/" method="GET" style="display: flex; width: 100%;">
+                <input type="text" name="q" placeholder="Search all materials here..." required>
+                <button type="submit">🔍</button>
+            </form>
+        </div>
+    </div>
+
+    <div style="display: flex; gap: 20px; align-items: center; justify-content: center; background-color: #ffffff; padding: 15px 0; width: 100%;">
+    
+    <a href="/" class="nav-item-plain">Home</a>
+    <a href="/materials/" class="nav-item-plain">Materials (Price Check)</a>
+        
+        {% if request.user.is_authenticated %}
+            <a href="/add-home/" class="nav-btn-orange">+ Add New Home</a>
+            <a href="/view-homes/" class="nav-btn-outline">My Projects</a>
+        {% endif %}
+    </div>
+
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+<script>
+    // 1. Swiper Initialize panrom (Basic Setup)
+    var swiper = new Swiper(".myHomeSwiper", {
+      spaceBetween: 0,
+      centeredSlides: true,
+      loop: false, // Suthi suthi varum
+      speed: 1000, // Slide aagura vegam (smooth-a iruka)
+      grabCursor: true, // Mouse vacha kai chinam varum (swipe panna mudiyum nu kaata)
+      
+      // Arrow Navigation Setup
+      navigation: {
+        nextEl: ".swiper-button-next",
+        prevEl: ".swiper-button-prev",
+      },
+      
+      // Keyboard la arrow amukunalu work aagum
+      keyboard: {
+        enabled: true,
+      },
+    });
+
+
+    // 2. THE SCROLL LOGIC (Scroll panna slide aagura magic)
+    
+    let lastScrollTop = 0;
+    let isScrolling = false; // Oru slide mudiyura varaikum adutha scroll-a block panna
+
+    window.addEventListener("scroll", function() {
+        // Slider view-la illana scroll logic work aaga venam
+        const sliderElement = document.querySelector('.home-slider-container');
+        if (!sliderElement) return;
+        const rect = sliderElement.getBoundingClientRect();
+        // Slider screen-a vittu veliya poiduchuna normal scroll aagatum
+        if (rect.bottom < 0 || rect.top > window.innerHeight) return;
+
+
+        let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        
+        // Already slide aagitu iruntha wait pannu
+        if (isScrolling) return;
+
+        if (scrollTop > lastScrollTop) {
+            // Down Scroll Check (Kila poringa -> Adutha image varanum)
+            // Konjam speed-a scroll pannuna thaan trigger aaganum (threshold: 5px)
+            if (scrollTop - lastScrollTop > 5) {
+                console.log("Scrolled Down -> Next Slide");
+                swiper.slideNext();
+                blockScrollTemporarily();
+            }
+        } else {
+            // Up Scroll Check (Mela poringa -> Munthaya image varanum)
+            if (lastScrollTop - scrollTop > 5) {
+                console.log("Scrolled Up -> Prev Slide");
+                swiper.slidePrev();
+                blockScrollTemporarily();
+            }
+        }
+        
+        // Current position-a save panrom adutha check-ku
+        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop; 
+    }, false);
+
+
+    // Oru thadava scroll panna 1.2 seconds-ku adutha slide vara koodathu.
+    // Illana rrr-nu speed-a slide aagidum.
+    function blockScrollTemporarily() {
+        isScrolling = true;
+        setTimeout(() => {
+            isScrolling = false;
+        }, 1200); // 1200ms wait time (transition speed oda konjam athigama)
+    }
+
+    // === BRANDS SLIDER JAVASCRIPT ===
+    var brandsSwiper = new Swiper(".brandsSwiper", {
+        slidesPerView: "auto", // 250px size-la ethana logo theriyumo atha auto-va fit pannikum
+        spaceBetween: 20, // Oru logo kum inoru logo kum 20px idaiyveli
+        freeMode: true, // Phone-la thallumbothu smooth-a pogum (exact-a nikaathu)
+        grabCursor: true, // Mouse vacha kai chinam varum
+        
+        // Navigation Arrows
+        navigation: {
+            nextEl: ".brand-next",
+            prevEl: ".brand-prev",
+        },
+        
+        // Ithu thaan neenga ketta antha "Swipe/Scroll" a work aaga vaikum
+        mousewheel: {
+            forceToAxis: true, // Mouse-oda round wheel-a suthuna ithu right-left aagum!
+        },
+    });
+
+    // === BRANDS SCROLL MAGIC ===
+    
+    let lastBrandScrollTop = 0;
+    let isBrandScrolling = false; 
+
+    window.addEventListener("scroll", function() {
+        const brandsElement = document.querySelector('.brands-section');
+        if (!brandsElement) return;
+        
+        const rect = brandsElement.getBoundingClientRect();
+        
+        // Brands section screen-kulla therincha mattum thaan work aaganum
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            if (isBrandScrolling) return;
+
+            // Kila Scroll panrom (Down) -> Right-la move aaganum
+            if (scrollTop > lastBrandScrollTop + 10) { 
+                brandsSwiper.slidePrev(); // Inga Next-ku pathila Prev mathiyachu!
+                blockBrandScroll();
+            } 
+            // Mela Scroll panrom (Up) -> Left-la move aaganum
+            else if (scrollTop < lastBrandScrollTop - 10) {
+                brandsSwiper.slideNext(); // Inga Prev-ku pathila Next mathiyachu!
+                blockBrandScroll();
+            }
+            
+            lastBrandScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+        }
+    });
+
+    function blockBrandScroll() {
+        isBrandScrolling = true;
+        setTimeout(() => {
+            isBrandScrolling = false;
+        }, 300); 
+    }
+// === COST CALCULATOR LOGIC ===
+function calculateCost() {
+    // User kudutha data-va edukurom
+    let sqft = document.getElementById('calc-area').value;
+    let ratePerSqft = document.getElementById('calc-location').value;
+
+    if (!sqft || sqft <= 0) {
+        alert("Please enter a valid Square Feet area!");
+        return;
+    }
+
+    // Calculations
+    let totalBaseCost = sqft * ratePerSqft;
+
+    // Stages (7%, 66%, 27% breakdown)
+    let preCost = totalBaseCost * 0.07;
+    let constCost = totalBaseCost * 0.66;
+    let postCost = totalBaseCost * 0.27;
+
+    // Min and Max (-2% and +2%)
+    let minCost = totalBaseCost * 0.98;
+    let maxCost = totalBaseCost * 1.02;
+
+    // Number-a currency format-ku (e.g. 1,513,512.00) matha oru chinna function
+    const formatMoney = (num) => {
+        return num.toLocaleString('en-IN', { maximumFractionDigits: 0 });
+    };
+
+    // UI-la result-a kaaturom
+    document.getElementById('total-range').innerText = 
+        `Rs. ${formatMoney(minCost)}.00 - ${formatMoney(maxCost)}.00`;
+    
+    document.getElementById('pre-cost').innerText = `Rs. ${formatMoney(preCost)}`;
+    document.getElementById('const-cost').innerText = `Rs. ${formatMoney(constCost)}`;
+    document.getElementById('post-cost').innerText = `Rs. ${formatMoney(postCost)}`;
+
+    // Hidden-a iruntha result div-a show pandrom
+    document.getElementById('calc-result').style.display = 'block';
+}
+// === CLEAR CALCULATOR LOGIC ===
+function clearCalculator() {
+    // 1. Sqft input box-a empty pandrom
+    document.getElementById('calc-area').value = '';
+    
+    // 2. Location dropdown-a default-ku (Urban - 1287) mathidrom
+    document.getElementById('calc-location').value = '1287';
+    
+    // 3. Result div-a thirumba hide pannidrom
+    document.getElementById('calc-result').style.display = 'none';
+}
+
+</script>
+<style>
+/* 1. Normal Links (Home, Materials) */
+.nav-item-plain {
+    background-color: transparent;
+    color: #000000; /* Black text mathiyachu */
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: bold; /* Text theliva theriya bold */
+    padding: 8px 15px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+.nav-item-plain:hover {
+    color: #d35400; /* Mouse vecha text Orange-ku maarum */
+    background-color: #f5f5f5; /* Light grey background varum */
+}
+
+/* 2. Main Button (+ Add New Home) */
+.nav-btn-orange {
+    background-color: #d35400; /* Ithu orange & white laye irukattum (High contrast) */
+    color: #ffffff !important;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 8px 20px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+.nav-btn-orange:hover {
+    background-color: #e67e22;
+    transform: translateY(-2px);
+}
+
+/* 3. Outline Button (My Projects) */
+.nav-btn-outline {
+    background-color: transparent;
+    color: #000000 !important; /* Black text */
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 6px 18px;
+    border: 2px solid #000000; /* Black Border */
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+.nav-btn-outline:hover {
+    background-color: #000000; /* Mouse vecha full black aagidum */
+    color: #ffffff !important; /* Text white aagidum */
+}
+</style>
+<style>
+    /* Footer மொத்த டிசைன் */
+    .site-footer {
+        background-color: #222222; /* நல்ல டார்க் பின்னணி */
+        color: #bbbbbb; /* லைட் சாம்பல் நிற எழுத்து */
+        padding: 60px 0 20px;
+        font-family: Arial, sans-serif;
+        margin-top: 50px; /* மேல இருக்கும் கண்டென்ட்ல இருந்து கொஞ்சம் இடைவெளி */
+    }
+
+    .footer-container {
+        width: 90%;
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        flex-wrap: wrap; /* மொபைலில் வரிசையாக வர */
+        justify-content: space-between;
+        gap: 30px;
+    }
+
+    /* ஒவ்வொரு காலமும் (Column) */
+    .footer-col {
+        flex: 1;
+        min-width: 220px; /* ரொம்ப சுருங்காம இருக்க */
+        margin-bottom: 20px;
+    }
+
+    /* தலைப்புகள் */
+    .footer-col h3 {
+        color: #ffffff; /* வெள்ளை நிற தலைப்பு */
+        font-size: 18px;
+        margin-bottom: 25px;
+        position: relative;
+        font-weight: bold;
+    }
+
+    /* தலைப்புக்கு கீழே ஒரு சின்ன ஆரஞ்சு கோடு */
+    .footer-col h3::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: -10px;
+        background-color: #d35400; /* உங்க ஆரஞ்சு கலர் */
+        height: 3px;
+        width: 50px;
+    }
+
+    /* லிங்க்ஸ் டிசைன் */
+    .footer-links {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .footer-links li {
+        margin-bottom: 15px;
+    }
+    .footer-links a {
+        color: #bbbbbb;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+    }
+    .footer-links a i {
+        margin-right: 10px;
+        font-size: 14px;
+    }
+    /* மவுஸ் வைக்கும்போது ஆரஞ்சு கலராக மாற */
+    .footer-links a:hover {
+        color: #d35400;
+        padding-left: 8px; /* சின்ன அனிமேஷன் */
+    }
+
+    /* Contact Details */
+    .contact-info p {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 15px;
+        line-height: 1.6;
+    }
+    .contact-info i {
+        color: #d35400; /* ஐகான் ஆரஞ்சு கலரில் */
+        margin-right: 15px;
+        font-size: 18px;
+        margin-top: 5px;
+    }
+
+    /* Footer Bottom Bar (காப்பிரைட் பகுதி) */
+    .footer-bottom {
+        background-color: #111111; /* இன்னும் கொஞ்சம் டார்க் */
+        padding: 20px 0;
+        margin-top: 40px;
+        border-top: 1px solid #333;
+    }
+    .footer-bottom-container {
+        width: 90%;
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    .copyright-text {
+        font-size: 14px;
+    }
+    .social-icons a {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        width: 40px;
+        height: 40px;
+        background-color: #333;
+        color: #ffffff;
+        border-radius: 50%; /* வட்ட வடிவம் */
+        margin-left: 10px;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+    .social-icons a:hover {
+        background-color: #d35400; /* மவுஸ் வைத்தால் ஆரஞ்சு */
+    }
+</style>
+
+<footer class="site-footer">
+    <div class="footer-container">
+        
+        <div class="footer-col">
+            <h3 style="color: #d35400;">SMARTBUILDES</h3>
+            <p style="line-height: 1.8; margin-bottom: 20px;">
+                Your complete home construction management partner. We help you plan, track, and build your dream home efficiently.
+            </p>
+            <div class="contact-info">
+                <p><i class="fas fa-map-marker-alt"></i> No.123, Tech Park Street,<br>Madurai, Tamil Nadu - 625001.</p>
+            </div>
+        </div>
+
+        <div class="footer-col">
+            <h3>Quick Links</h3>
+            <ul class="footer-links">
+                <li><a href="/"><i class="fas fa-chevron-right"></i> Home</a></li>
+                <li><a href="/materials/"><i class="fas fa-chevron-right"></i> Material Prices</a></li>
+                <li><a href="/add-home/"><i class="fas fa-chevron-right"></i> Add New Project</a></li>
+                <li><a href="/view-homes/"><i class="fas fa-chevron-right"></i> My Projects</a></li>
+                <li><a href="#"><i class="fas fa-chevron-right"></i> About Us (Soon)</a></li>
+                <li><a href="#"><i class="fas fa-chevron-right"></i> Contact Us (Soon)</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-col">
+            <h3>Popular Materials</h3>
+            <ul class="footer-links">
+                <li><a href="#"><i class="fas fa-chevron-right"></i> Cement</a></li>
+                <li><a href="#"><i class="fas fa-chevron-right"></i> TMT Steel Bars</a></li>
+                <li><a href="#"><i class="fas fa-chevron-right"></i> Bricks & Blocks</a></li>
+                <li><a href="#"><i class="fas fa-chevron-right"></i> Paints & Finishes</a></li>
+                <li><a href="#"><i class="fas fa-chevron-right"></i> Plumbing & Sanitary</a></li>
+                <li><a href="#"><i class="fas fa-chevron-right"></i> Electricals</a></li>
+            </ul>
+        </div>
+
+        <div class="footer-col">
+            <h3>Contact Us</h3>
+            <div class="contact-info">
+                <p><i class="fas fa-phone-alt"></i> +91 98765 43210</p>
+                <p><i class="fas fa-envelope"></i> support@smartbuildes.com</p>
+                <p><i class="fab fa-whatsapp"></i> +91 98765 43210</p>
+            </div>
+            
+            <div style="margin-top: 20px; height: 100px; background-color: #333; display: flex; justify-content: center; align-items: center; border-radius: 4px;">
+                <i class="fas fa-map-marked-alt" style="color: #555; font-size: 30px;"></i>
+                <span style="margin-left: 10px; color: #777;">Map Loading...</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <div class="footer-bottom-container">
+            <div class="copyright-text">
+                &copy; 2026 <strong>Smartbuildes</strong>. All Rights Reserved.
+            </div>
+            
+            <div class="social-icons">
+                <a href="#"><i class="fab fa-facebook-f"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-linkedin-in"></i></a>
+            </div>
+        </div>
+    </div>
+</footer>
+</body>
+</html>

@@ -79,8 +79,17 @@ def add_home(request):
     if request.method == 'POST':
         form = HomeProjectForm(request.POST)
         if form.is_valid():
-            form.save() # Data-va database-la save panrom
-            return redirect('home') # Save aanathum Home page-ku anuppidrom
+            # 1. டேட்டாபேஸ்ல உடனே சேவ் பண்ணாத, வெயிட் பண்ணுன்னு சொல்றோம்
+            new_project = form.save(commit=False) 
+            
+            # 2. லாகின் பண்ணிருக்க யூசரை, இந்த ப்ராஜெக்ட்டோட இணைக்கிறோம் (இதுதான் மிக முக்கியம்!)
+            new_project.user = request.user 
+            
+            # 3. இப்போ டேட்டாபேஸ்ல முழுசா சேவ் பண்றோம்
+            new_project.save() 
+            
+            # 4. Save ஆனதும் 'Home' பேஜுக்கு போறத விட 'My Projects' பேஜுக்கு போனா தான் யூசருக்கு நல்லாருக்கும்
+            return redirect('view_homes') 
     else:
         form = HomeProjectForm() # Puthu blank form
         

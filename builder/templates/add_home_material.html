@@ -18,18 +18,17 @@
     .material-card {
         background: #ffffff;
         max-width: 800px;
-        margin: 0 auto 30px auto; /* Cards-க்கு நடுவே இடைவெளி */
+        margin: 0 auto 30px auto; 
         padding: 40px;
         border-radius: 12px;
         box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-        border-top: 5px solid #d35400; /* Smartbuildes Orange */
+        border-top: 5px solid #d35400; 
     }
 
     .table-card {
-        border-top: 5px solid #2980b9; /* Table Card-க்கு Blue Border */
+        border-top: 5px solid #2980b9; 
     }
 
-    /* Titles */
     .card-title {
         text-align: center;
         color: #333;
@@ -42,6 +41,47 @@
 
     .card-title i {
         margin-right: 10px;
+    }
+
+    /* =========================================
+       TOGGLE SWITCH STYLING
+       ========================================= */
+    .mode-selector {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 30px;
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid #e0e0e0;
+    }
+
+    .mode-option {
+        flex: 1;
+        position: relative;
+    }
+
+    .mode-option input {
+        display: none;
+    }
+
+    .mode-label {
+        display: block;
+        text-align: center;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: bold;
+        color: #555;
+        cursor: pointer;
+        transition: all 0.3s;
+        border: 2px solid transparent;
+    }
+
+    .mode-option input:checked + .mode-label {
+        background-color: #fff;
+        color: #d35400;
+        border-color: #d35400;
+        box-shadow: 0 4px 10px rgba(211, 84, 0, 0.1);
     }
 
     /* =========================================
@@ -78,7 +118,6 @@
         box-sizing: border-box;
     }
 
-    /* Custom Arrow for Dropdowns */
     .custom-select {
         appearance: none;
         -webkit-appearance: none;
@@ -101,12 +140,12 @@
         background-color: #eeeeee;
         opacity: 0.7;
         cursor: not-allowed;
-        background-image: none; /* Disabled போது Arrow வேண்டாம் */
+        background-image: none;
     }
 
     /* Button */
     .btn-add {
-        background-color: #27ae60; /* Green color for 'Add' action */
+        background-color: #27ae60;
         color: white;
         padding: 15px 20px;
         border: none;
@@ -145,7 +184,7 @@
         padding: 15px;
         text-align: left;
         font-size: 15px;
-        border-bottom: 2px solid #2980b9; /* Blue highlight */
+        border-bottom: 2px solid #2980b9; 
     }
 
     .modern-table td {
@@ -164,6 +203,31 @@
         font-weight: bold;
         font-size: 16px;
     }
+    /* =========================================
+   MOBILE VIEW FOR MATERIAL PAGE
+   ========================================= */
+@media screen and (max-width: 768px) {
+    .add-material-wrapper {
+        padding: 15px 10px; /* மொபைல்ல ஓரத்துல இடைவெளியை குறைக்கிறோம் */
+    }
+
+    .material-card {
+        padding: 20px 15px; /* கார்டுக்குள்ள இடைவெளியை குறைக்கிறோம் */
+    }
+
+    .mode-selector {
+        flex-direction: column; /* ரெண்டு பட்டனையும் மேல/கீழா மாத்துறோம் */
+        gap: 10px;
+    }
+
+    .card-title {
+        font-size: 18px; /* Title சைஸை சின்னதாக்குறோம் */
+    }
+
+    .custom-input, .custom-select {
+        padding: 10px 12px; /* பாக்ஸ் சைஸை மொபைலுக்கு ஏத்த மாதிரி சுருக்குறோம் */
+    }
+}
 </style>
 
 <div class="add-material-wrapper">
@@ -173,36 +237,66 @@
             <i class="fas fa-tools"></i> Add Materials for: {{ home.owner_name }}'s Project
         </h2>
         
+        <div class="mode-selector">
+            <div class="mode-option">
+                <input type="radio" id="mode_select" name="entry_mode" value="select" checked onchange="toggleMode()">
+                <label for="mode_select" class="mode-label"><i class="fas fa-list"></i> Select from Database</label>
+            </div>
+            <div class="mode-option">
+                <input type="radio" id="mode_custom" name="entry_mode" value="custom" onchange="toggleMode()">
+                <label for="mode_custom" class="mode-label"><i class="fas fa-keyboard"></i> Enter Custom Material</label>
+            </div>
+        </div>
+
         <form method="POST">
             {% csrf_token %}
             
-            <div class="form-group">
-                <label><i class="fas fa-hard-hat"></i> 1. Select Profession:</label>
-                <select id="profSelect" class="custom-select" onchange="loadMaterials()" required>
-                    <option value="">-- Select Work Type --</option>
-                    {% for prof in unique_professions %}
-                        <option value="{{ prof }}">{{ prof }}</option>
-                    {% endfor %}
-                </select>
+            <div id="select_section">
+                <div class="form-group">
+                    <label><i class="fas fa-hard-hat"></i> Select Profession:</label>
+                    <select id="profSelect" class="custom-select" onchange="loadMaterials()" required>
+                        <option value="">-- Select Work Type --</option>
+                        {% for prof in unique_professions %}
+                            <option value="{{ prof }}">{{ prof }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-cubes"></i> Select Material:</label>
+                    <select id="matSelect" class="custom-select" onchange="loadCompanies()" disabled>
+                        <option value="">-- First Select Work Type --</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-building"></i> Select Company:</label>
+                    <select id="compSelect" class="custom-select" name="material_id" disabled>
+                        <option value="">-- Then Select Material --</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-weight-hanging"></i> Quantity:</label>
+                    <input type="number" id="qtyInput" name="quantity" class="custom-input" min="1" placeholder="Enter quantity (e.g. 10)" required>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label><i class="fas fa-cubes"></i> 2. Select Material:</label>
-                <select id="matSelect" class="custom-select" onchange="loadCompanies()" disabled required>
-                    <option value="">-- First Select Work Type --</option>
-                </select>
-            </div>
+            <div id="custom_section" style="display: none;">
+                <div class="form-group">
+                    <label><i class="fas fa-pen"></i> Material Name:</label>
+                    <input type="text" id="customName" name="custom_name" class="custom-input" placeholder="e.g. Local Sand / Extra Bricks">
+                </div>
 
-            <div class="form-group">
-                <label><i class="fas fa-building"></i> 3. Select Company:</label>
-                <select id="compSelect" class="custom-select" name="material_id" disabled required>
-                    <option value="">-- Then Select Material --</option>
-                </select>
-            </div>
+                <div class="form-group">
+                    <label><i class="fas fa-rupee-sign"></i> Price per Unit (₹):</label>
+                    <input type="number" id="customPrice" name="custom_price" class="custom-input" step="0.01" placeholder="Enter price per unit">
+                </div>
 
-            <div class="form-group">
-                <label><i class="fas fa-weight-hanging"></i> 4. Quantity:</label>
-                <input type="number" name="quantity" class="custom-input" min="1" required placeholder="Enter quantity (e.g. 10)">
+                <div class="form-group">
+                    <label><i class="fas fa-weight-hanging"></i> Quantity:</label>
+                    <input type="number" id="customQty" name="custom_quantity" class="custom-input" min="1" placeholder="Enter quantity needed">
+                </div>
             </div>
 
             <button type="submit" class="btn-add"><i class="fas fa-plus-circle"></i> Add to Estimate</button>
@@ -252,6 +346,47 @@
 <script>
     const materialsData = JSON.parse(document.getElementById('materials-data').textContent);
 
+    // ==========================================
+    // JS Logic to Toggle between Select & Custom
+    // ==========================================
+    function toggleMode() {
+        let mode = document.querySelector('input[name="entry_mode"]:checked').value;
+        let selectSection = document.getElementById('select_section');
+        let customSection = document.getElementById('custom_section');
+
+        if (mode === 'select') {
+            // Show Select, Hide Custom
+            selectSection.style.display = 'block';
+            customSection.style.display = 'none';
+            
+            // Set Required fields for Select Mode
+            document.getElementById('profSelect').required = true;
+            document.getElementById('qtyInput').required = true;
+            
+            // Remove Required from Custom Mode so form can submit
+            document.getElementById('customName').required = false;
+            document.getElementById('customPrice').required = false;
+            document.getElementById('customQty').required = false;
+            
+        } else {
+            // Hide Select, Show Custom
+            selectSection.style.display = 'none';
+            customSection.style.display = 'block';
+            
+            // Remove Required from Select Mode
+            document.getElementById('profSelect').required = false;
+            document.getElementById('qtyInput').required = false;
+            
+            // Set Required fields for Custom Mode
+            document.getElementById('customName').required = true;
+            document.getElementById('customPrice').required = true;
+            document.getElementById('customQty').required = true;
+        }
+    }
+
+    // ==========================================
+    // Existing Dropdown Logic
+    // ==========================================
     function loadMaterials() {
         const profession = document.getElementById('profSelect').value;
         const matSelect = document.getElementById('matSelect');
@@ -273,6 +408,11 @@
                 option.text = name;
                 matSelect.add(option);
             });
+            // Dropdown change aanathum required aakura logic
+            matSelect.required = true;
+        } else {
+            matSelect.required = false;
+            compSelect.required = false;
         }
     }
 
@@ -289,12 +429,14 @@
             
             filteredMaterials.forEach(m => {
                 let option = document.createElement('option');
-                option.value = m.id; // DB ID-a anupurom
+                option.value = m.id; 
                 option.text = m.company + " (₹" + m.price + " per unit)";
                 compSelect.add(option);
             });
+            compSelect.required = true;
         } else {
             compSelect.disabled = true;
+            compSelect.required = false;
         }
     }
 </script>

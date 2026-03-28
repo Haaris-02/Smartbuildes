@@ -138,19 +138,45 @@ def update_home(request, id):
     return render(request, 'update_home.html', {'form': form})
 
 # Oru specific home-ku materials add panrathuku
+# Oru specific home-ku materials add panrathuku
 def add_material_to_home(request, id):
     home = HomeProject.objects.get(id=id)
     
     if request.method == 'POST':
-        # Custom HTML form-la irunthu data-va edukkurom
+        # 1. Existing Material Logic (பழைய மெட்டீரியல் செலக்ட் பண்ணா)
         material_id = request.POST.get('material_id')
         quantity = request.POST.get('quantity')
         
-        if material_id and quantity:
+        # 2. Custom Material Logic (யூசரே புதுசா டைப் பண்ணா)
+        custom_name = request.POST.get('custom_name')
+        custom_price = request.POST.get('custom_price')
+        custom_quantity = request.POST.get('custom_quantity')
+
+        # யூசர் புதுசா டைப் பண்ணி ஆட் பண்ணியிருந்தா...
+        if custom_name and custom_price and custom_quantity:
+            # A) டேட்டாபேஸ்ல ஒரு புது மெட்டீரியலை உருவாக்குறோம்
+            new_material = Material.objects.create(
+                name=custom_name,
+                price=float(custom_price),
+                profession_category='Custom (Added by User)', # தனியா தெரியுறதுக்காக
+                company_name='Local'
+            )
+            total = float(custom_price) * int(custom_quantity)
+            
+            # B) அதை இந்த ப்ராஜெக்ட்டோட இணைக்கிறோம்
+            HomeMaterial.objects.create(
+                home=home,
+                material=new_material,
+                quantity=custom_quantity,
+                total_price=total
+            )
+            return redirect('add_material', id=home.id)
+
+        # லிஸ்ட்ல இருந்து பழைய மெட்டீரியல் செலக்ட் பண்ணியிருந்தா...
+        elif material_id and quantity:
             selected_material = Material.objects.get(id=material_id)
             total = selected_material.price * int(quantity)
             
-            # Database-la save panrom
             HomeMaterial.objects.create(
                 home=home,
                 material=selected_material,
@@ -159,7 +185,7 @@ def add_material_to_home(request, id):
             )
             return redirect('add_material', id=home.id)
 
-    # JavaScript-ku data anuppa JSON format mathurom
+    # JavaScript-ku data anuppa JSON format mathurom (இது பழைய கோடு அப்படியே தான் இருக்கு)
     materials = Material.objects.all()
     materials_data = []
     for m in materials:
@@ -181,30 +207,6 @@ def add_material_to_home(request, id):
         'materials_json': materials_data
     }
     return render(request, 'add_home_material.html', context)
-
-    # JavaScript-ku data anuppa JSON format mathurom
-    materials = Material.objects.all()
-    materials_data = []
-    for m in materials:
-        materials_data.append({
-            'id': m.id,
-            'profession': m.profession_category,
-            'name': m.name,
-            'company': m.company_name,
-            'price': float(m.price)
-        })
-
-    unique_professions = list(set([m.profession_category for m in materials]))
-    added_materials = HomeMaterial.objects.filter(home=home)
-    
-    context = {
-        'home': home,
-        'added_materials': added_materials,
-        'unique_professions': unique_professions,
-        'materials_json': materials_data
-    }
-    return render(request, 'add_home_material.html', context)
-
 def generate_bill(request, id):
     home = HomeProject.objects.get(id=id)
     materials = HomeMaterial.objects.filter(home=home)
